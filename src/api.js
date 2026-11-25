@@ -9,7 +9,7 @@ export const CHAINS = {
   polygon: { name: "Polygon", symbol: "POL", host: "https://polygon.blockscout.com" },
 };
 
-const TIMEOUT_MS = 25000;
+const TIMEOUT_MS = 60000;
 
 async function get(chain, path, params = {}) {
   const url = new URL(`/api/v2${path}`, CHAINS[chain].host);

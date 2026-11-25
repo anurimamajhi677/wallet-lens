@@ -71,6 +71,18 @@ function renderSummary(info, chain) {
   $("native-usd").textContent = usd == null ? "" : `≈ ${formatUsd(usd)}`;
 }
 
+/** Loading / error placeholder inside the token table or transaction list. */
+function showSectionMessage(section, text, isError = false) {
+  const cls = isError ? "empty error-text" : "empty";
+  if (section === "tokens") {
+    $("tokens-total").textContent = "…";
+    $("tokens-count").textContent = "";
+    $("token-rows").replaceChildren(el("tr", {}, el("td", { colspan: "3", class: cls, text })));
+  } else {
+    $("tx-list").replaceChildren(el("li", { class: cls, text }));
+  }
+}
+
 function renderTokens() {
   const hideUnpriced = !$("show-unpriced").checked;
   const tokens = cleanTokens(current.tokensRaw, { hideUnpriced });
@@ -144,21 +156,32 @@ async function lookup(query, chain) {
       throw new Error("Enter a valid 0x address (42 characters) or an ENS name ending in .eth.");
     }
 
-    setStatus("Loading balances and transactions…");
-    const [info, tokens, txs] = await Promise.all([
-      getAddress(chain, address),
-      getTokens(chain, address).catch(() => ({ items: [] })),
-      getTransactions(chain, address).catch(() => ({ items: [] })),
-    ]);
+    setStatus("Loading wallet…");
+    // Start all three requests at once; each section renders as soon as its
+    // own data arrives, so one slow endpoint doesn't hold up the others.
+    const tokensReq = getTokens(chain, address);
+    const txsReq = getTransactions(chain, address);
+    tokensReq.catch(() => {}); txsReq.catch(() => {}); // handled below
+    const info = await getAddress(chain, address);
     if (requestId !== current.requestId) return; // a newer search started
 
-    current = { ...current, chain, address, tokensRaw: tokens.items || [], nextPage: txs.next_page_params };
+    current = { ...current, chain, address, tokensRaw: [], nextPage: null };
     renderSummary(info, chain);
-    renderTokens();
-    renderTransactions(txs.items || [], false);
+    showSectionMessage("tokens", "Loading tokens… (large wallets can take a while)");
+    showSectionMessage("txs", "Loading transactions…");
+    $("more").hidden = true;
     $("results").hidden = false;
     setStatus("");
     saveRecent(query);
+
+    txsReq.then((txs) => {
+      if (requestId !== current.requestId) return;
+      current.nextPage = txs.next_page_params;
+      renderTransactions(txs.items || [], false);
+    }, (err) => {
+      if (requestId === current.requestId) showSectionMessage("txs", err.message, true);
+    });
+    handleTokens(tokensReq, requestId);
 
     const url = new URL(location.href);
     url.searchParams.set("address", query);
@@ -168,6 +191,26 @@ async function lookup(query, chain) {
     if (requestId !== current.requestId) return;
     setStatus(err.message || "Something went wrong.", true);
   }
+}
+
+function handleTokens(request, requestId) {
+  request.then((tokens) => {
+    if (requestId !== current.requestId) return;
+    current.tokensRaw = tokens.items || [];
+    renderTokens();
+  }, (err) => {
+    if (requestId !== current.requestId) return;
+    const timedOut = /too long/.test(err.message);
+    showSectionMessage("tokens", timedOut
+      ? "This wallet holds a very large number of tokens and the free explorer timed out. "
+      : `${err.message} `, true);
+    const retry = el("button", { type: "button", class: "link", text: "Retry" });
+    retry.addEventListener("click", () => {
+      showSectionMessage("tokens", "Loading tokens… (large wallets can take a while)");
+      handleTokens(getTokens(current.chain, current.address), requestId);
+    });
+    $("token-rows").querySelector("td").append(retry);
+  });
 }
 
 async function loadMore() {

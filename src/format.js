@@ -38,7 +38,8 @@ export function formatAmount(decimalString, maxFraction = 4) {
   if (!Number.isFinite(n)) return decimalString;
   if (n === 0) return "0";
   if (Math.abs(n) < 1e-6) return "<0.000001";
-  if (Math.abs(n) >= 1e12) return n.toExponential(2);
+  if (Math.abs(n) >= 1e15) return n.toExponential(2);
+  if (Math.abs(n) >= 1e9) return n.toLocaleString("en-US", { notation: "compact", maximumFractionDigits: 2 });
   const digits = Math.abs(n) < 1 ? 6 : maxFraction;
   return n.toLocaleString("en-US", { maximumFractionDigits: digits });
 }
@@ -48,6 +49,9 @@ export function formatUsd(value) {
   const n = Number(value);
   if (!Number.isFinite(n) || n === 0) return "$0.00";
   if (Math.abs(n) < 0.01) return "<$0.01";
+  if (Math.abs(n) >= 1e9) {
+    return n.toLocaleString("en-US", { style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 2 });
+  }
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 

@@ -30,7 +30,8 @@ test/               unit tests for format.js (Node's built-in test runner)
 - **Data source:** [Blockscout](https://docs.blockscout.com/devs/apis/rest), an open-source block explorer with a free, keyless, CORS-enabled API. Each chain is just a different Blockscout host, so adding a chain is one line in `src/api.js`.
 - **Precision:** token balances arrive as huge integers in base units (wei). `fromBaseUnits` converts them with `BigInt`, so large balances don't lose precision the way JavaScript `Number` would.
 - **Security:** token names and symbols are chosen by whoever deployed the token, so they are untrusted input. The UI builds every element with `textContent` and never `innerHTML`, which blocks script injection through a malicious token name.
-- **Resilience:** requests time out after 25 seconds, out-of-order responses are discarded if you start a new search, and the 404 / 429 (rate limit) cases show clear messages.
+- **Progressive loading:** the wallet summary, tokens and transactions are fetched in parallel and each section renders as soon as its own data arrives. Wallets full of airdropped spam (like `vitalik.eth`) can make the token endpoint very slow, so a slow token list never blocks the rest of the page.
+- **Resilience:** requests time out after 60 seconds with a Retry option, out-of-order responses are discarded if you start a new search, and the 404 / 429 (rate limit) cases show clear messages.
 
 ## Run it locally
 

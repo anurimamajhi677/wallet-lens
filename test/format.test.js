@@ -38,6 +38,8 @@ test("formatAmount and formatUsd", () => {
   assert.equal(formatUsd(1234.5), "$1,234.50");
   assert.equal(formatUsd(0.001), "<$0.01");
   assert.equal(formatUsd(0), "$0.00");
+  assert.equal(formatAmount("9184997801.48"), "9.18B");
+  assert.equal(formatUsd(9174260539.05), "$9.17B");
 });
 
 test("usdValue", () => {
