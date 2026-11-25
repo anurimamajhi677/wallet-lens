@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wallet Lens</title>
+  <meta name="description" content="Read-only wallet tracker: token balances and recent transactions for any public EVM address." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>" />
+  <link rel="stylesheet" href="src/style.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <h1>Wallet Lens</h1>
+      <p class="tagline">Look up token balances and recent transactions for any public wallet. Read-only: no wallet connection, no keys, no money.</p>
+      <form id="search" class="search" autocomplete="off">
+        <label class="sr-only" for="address">Wallet address or ENS name</label>
+        <input id="address" name="address" placeholder="0x… address or name.eth" spellcheck="false" required />
+        <label class="sr-only" for="chain">Chain</label>
+        <select id="chain" name="chain"></select>
+        <button type="submit">Look up</button>
+      </form>
+      <div class="examples">Try:
+        <button type="button" class="link" data-example="vitalik.eth">vitalik.eth</button>
+        <button type="button" class="link" data-example="0x47ac0Fb4F2D84898e4D9E7b4DaB3C24507a6D503">Binance cold wallet</button>
+      </div>
+      <div id="recent" class="examples" hidden></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div id="status" role="status" aria-live="polite"></div>
+
+    <section id="results" hidden>
+      <div class="cards">
+        <div class="card">
+          <div class="label">Wallet</div>
+          <div id="wallet-name" class="value"></div>
+          <a id="wallet-link" class="mono small" target="_blank" rel="noopener"></a>
+        </div>
+        <div class="card">
+          <div class="label">Native balance</div>
+          <div id="native" class="value"></div>
+          <div id="native-usd" class="small muted"></div>
+        </div>
+        <div class="card">
+          <div class="label">Tokens (priced)</div>
+          <div id="tokens-total" class="value"></div>
+          <div id="tokens-count" class="small muted"></div>
+        </div>
+      </div>
+
+      <div class="panels">
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Token balances</h2>
+            <label class="small"><input type="checkbox" id="show-unpriced" /> show unpriced</label>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Token</th><th class="num">Amount</th><th class="num">Value</th></tr></thead>
+              <tbody id="token-rows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><h2>Recent transactions</h2></div>
+          <ul id="tx-list" class="tx-list"></ul>
+          <button id="more" class="secondary" hidden>Load more</button>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap small muted">
+    Data from the public <a href="https://www.blockscout.com/" target="_blank" rel="noopener">Blockscout</a> API. Prices are estimates. Not financial advice.
+  </footer>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

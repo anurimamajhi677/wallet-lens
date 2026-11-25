@@ -1,0 +1,12 @@
+{
+  "name": "wallet-lens",
+  "version": "1.0.0",
+  "description": "Read-only Web3 wallet tracker: token balances and recent transactions for any public EVM address.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "npx --yes serve@14.2.4 .",
+    "test": "node --test test/"
+  },
+  "license": "MIT"
+}
