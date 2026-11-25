@@ -15,7 +15,7 @@ No wallet connection, no private keys, no API keys, no backend. It only reads pu
 - **Recent transactions** with in/out direction, method name, counterparty (ENS-aware), and age, with "Load more" pagination
 - **Shareable links:** the URL updates to `?address=…&chain=…`
 - **Recent searches** remembered in your browser
-- Works on mobile, supports light and dark mode
+- Works on mobile, dark theme with an orange accent
 
 ## How it works
 
